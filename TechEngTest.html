@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical English</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5e17eb',
+                        secondary: '#1a1a1a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 1px solid #e0e7ff;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .radio-option:hover {
+            background-color: #eef2ff;
+        }
+        .radio-option.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+        }
+        .radio-option.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.375rem;
+        }
+        .feedback.correct {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #b91c1c;
+        }
+        .question-button {
+            height: 2.5rem;
+            width: 2.5rem;
+            padding: 0;
+            font-weight: 500;
+            border-radius: 0.375rem;
+            border: 1px solid #c7d2fe;
+            background-color: #ffffff;
+            cursor: pointer;
+        }
+        .question-button.active {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+            color: #ffffff;
+            border-color: #5e17eb;
+        }
+        .question-button.correct {
+            background-color: #10b981;
+            color: #ffffff;
+            border-color: #10b981;
+        }
+        .question-button.incorrect {
+            background-color: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+        #results-section {
+            display: none;
+        }
+    </style>
+</head>
+<body class="font-sans bg-indigo-50/30">
+    <div class="flex flex-col min-h-screen">
+        <header class="sticky top-0 z-10 border-b bg-white shadow-sm">
+            <div class="container mx-auto flex h-16 items-center px-4 max-w-7xl">
+                <a href="ExamHub.html" class="flex items-center gap-2 font-bold text-xl text-indigo-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-6 w-6 text-indigo-600">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                    <span>ExamHub</span>
+                </a>
+            </div>
+        </header>
+        <main class="flex-1 container mx-auto py-8 px-4 max-w-4xl">
+            <div class="flex flex-col items-start gap-4 mb-8">
+                <div class="flex items-center gap-2">
+                    <a href="subject.html" class="text-indigo-700 hover:text-indigo-800 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="m12 19-7-7 7-7"></path>
+                            <path d="M19 12H5"></path>
+                        </svg>
+                        กลับไปที่ วิชาทั้งหมด
+                    </a>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight text-gradient">Technical English</h1>
+                <p class="text-gray-500">ตอบคำถามด้านล่าง คุณสามารถเลือกคำถามได้จากรายการคำถาม</p>
+            </div>
+            <div class="grid grid-cols-1 gap-6">
+                <div class="bg-white rounded-lg border border-indigo-100 shadow-sm overflow-hidden">
+                    <div class="p-6" id="quiz-container">
+                        <!-- Questions will be dynamically inserted here -->
+                    </div>
+                    <div class="flex justify-between p-4 border-t border-indigo-100" id="navigation-buttons">
+                        <button id="prev-button" class="px-4 py-2 border border-indigo-200 text-indigo-700 rounded-md hover:bg-indigo-50 hover:text-indigo-800 disabled:opacity-50" disabled>ก่อนหน้า</button>
+                        <button id="next-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90">ถัดไป</button>
+                        <button id="submit-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90 hidden" disabled>ส่งคำตอบ</button>
+                    </div>
+                </div>
+                <div id="question-buttons-section">
+                    <h2 class="text-lg font-semibold mb-4 text-indigo-800">คำถาม</h2>
+                    <div class="flex flex-wrap gap-2" id="question-buttons">
+                        <!-- Question buttons will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div id="results-section" class="bg-white rounded-lg border border-indigo-100 shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-indigo-800">ผลลัพธ์</h2>
+                        <button id="restart-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90">เริ่มใหม่</button>
+                    </div>
+                    <p id="score-text" class="text-lg mb-4"></p>
+                    <div id="results-details"></div>
+                </div>
+            </div>
+        </main>
+        <footer class="border-t py-6 bg-white">
+            <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4 max-w-7xl">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-5 w-5 text-indigo-600">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                    <span class="font-semibold text-indigo-800">ExamHub</span>
+                </div>
+                <p class="text-sm text-gray-500">© <span id="current-year"></span> ExamHub. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("current-year").textContent = new Date().getFullYear();
+
+            const quizData = [
+            {
+                "question": "He wanted to buy the new phone, ___ he didn't have enough money.",
+                "options": ["and", "but", "or", "so"],
+                "answer": 1
+            },
+            {
+                "question": "You can take the bus, ___ you can walk if you prefer.",
+                "options": ["for", "and", "or", "yet"],
+                "answer": 2
+            },
+            {
+                "question": "She was very tired, ___ she continued to work until midnight.",
+                "options": ["but", "nor", "so", "yet"],
+                "answer": 3
+            },
+            {
+                "question": "He doesn’t drink coffee, ___ does he drink tea.",
+                "options": ["but", "nor", "and", "so"],
+                "answer": 1
+            },
+            {
+                "question": "It was raining, ___ we canceled the picnic.",
+                "options": ["yet", "so", "but", "and"],
+                "answer": 1
+            },
+            {
+                "question": "She speaks Spanish fluently ___ also understands Portuguese.",
+                "options": ["and", "yet", "but", "so"],
+                "answer": 0
+            },
+            {
+                "question": "He missed the train, ___ he had to wait for the next one.",
+                "options": ["and", "or", "so", "yet"],
+                "answer": 2
+            },
+            {
+                "question": "I wanted to go swimming, ___ the pool was closed.",
+                "options": ["for", "but", "so", "or"],
+                "answer": 1
+            },
+            {
+                "question": "They stayed up late, ___ they were not tired.",
+                "options": ["so", "and", "for", "yet"],
+                "answer": 2
+            },
+            {
+                "question": "You must hurry up, ___ you'll miss the bus.",
+                "options": ["or", "and", "but", "for"],
+                "answer": 0
+            },
+        //
+        {
+        "question": "Choose the correct reported speech: Sarah said, \"I am watching a movie now.\"",
+        "options": [
+            "Sarah said that she is watching a movie now.",
+            "Sarah said that she had been watching a movie then.",
+            "Sarah said that she was watching a movie then.",
+            "Sarah said that she watched a movie now."
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Which is the correct indirect question from: \"Did you finish your homework?\"",
+        "options": [
+            "He asked me did I finish my homework.",
+            "He asked me if I had finished my homework.",
+            "He asked me if had I finished my homework.",
+            "He asked me if I finished my homework."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Convert to reported speech: \"I will call you tomorrow,\" said Mark.",
+        "options": [
+            "Mark said he would call me the next day.",
+            "Mark said he will call me tomorrow.",
+            "Mark said he called me the next day.",
+            "Mark said he would called me tomorrow."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Choose the correct sentence using a modal verb in reported speech: \"You must finish this by 5 PM,\" the teacher said.",
+        "options": [
+            "The teacher said I must finish it by 5 PM.",
+            "The teacher said I had to finish it by 5 PM.",
+            "The teacher said I should finish it by 5 PM.",
+            "The teacher said I finished it by 5 PM."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence correctly reports a command? The officer said to the soldier, \"Stand up!\"",
+        "options": [
+            "The officer asked the soldier to stand up.",
+            "The officer said the soldier stands up.",
+            "The officer told the soldier to stand up.",
+            "The officer requested the soldier stands up."
+        ],
+        "answer": 2
+    },
+    {
+        "question": "What is the reported speech for: \"I can help you,\" she said.",
+        "options": [
+            "She said she could help me.",
+            "She said she can help me.",
+            "She said she would help me.",
+            "She said she helps me."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Choose the correct backshifted form: \"They are working on the project,\" said the manager.",
+        "options": [
+            "The manager said they had worked on the project.",
+            "The manager said they are working on the project.",
+            "The manager said they were working on the project.",
+            "The manager said they have been working on the project."
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Identify the correct change in pronouns: Alex said, \"I love my new shoes.\"",
+        "options": [
+            "Alex said he loves his new shoes.",
+            "Alex said he loved his new shoes.",
+            "Alex said I loved my new shoes.",
+            "Alex said she loved her new shoes."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence correctly uses a reporting verb with a question? \"Where are you going?\" asked Tom.",
+        "options": [
+            "Tom asked me where am I going.",
+            "Tom asked where I go.",
+            "Tom asked me where I was going.",
+            "Tom told me where I was going."
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Find the correct reported speech with two clauses: \"I was nervous, but I passed the test,\" said Jane.",
+        "options": [
+            "Jane said that she had been nervous and she had passed the test.",
+            "Jane said that she was nervous but passed the test.",
+            "Jane said she had been nervous, but she passed the test.",
+            "Jane said she nervous and she had passed the test."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Choose the correct adverb clause to complete the sentence: ___, the technician was able to identify the problem.",
+        "options": [
+            "Because he had checked all connections",
+            "Although he was late",
+            "Unless he forgets the password",
+            "While restarting the system"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Identify the correct reduced adverb clause: \"Because she was feeling sick, she stayed home.\"",
+        "options": [
+            "Being felt sick, she stayed home.",
+            "Feeling sick, she stayed home.",
+            "Sick feeling, she stayed home.",
+            "Felt sick, she stayed home."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence contains a reduced adverb clause?",
+        "options": [
+            "Although he studied hard, he failed the test.",
+            "While he was walking to school, it started to rain.",
+            "After finishing the report, she submitted it to her boss.",
+            "Because he was tired, he went to bed early."
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Choose the subordinating conjunction that shows contrast:",
+        "options": [
+            "Because",
+            "While",
+            "Even though",
+            "As soon as"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Choose the best option to complete the sentence: He kept working ___ he was exhausted.",
+        "options": [
+            "since",
+            "although",
+            "if",
+            "unless"
+        ],
+        "answer": 1
+    },{
+        "question": "Which sentence correctly uses a restrictive adjective clause to describe the noun 'book'?",
+        "options": [
+            "The book, which I read last week, was fascinating.",
+            "The book that I read last week was fascinating.",
+            "The book, that I read last week, was fascinating.",
+            "The book whom I read last week was fascinating."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Identify the sentence with a non-restrictive adjective clause that is punctuated correctly.",
+        "options": [
+            "My sister who lives in Bangkok is a doctor.",
+            "My sister, who lives in Bangkok, is a doctor.",
+            "My sister who lives in Bangkok, is a doctor.",
+            "My sister, who lives in Bangkok is a doctor."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which relative pronoun is correctly used in this sentence: 'The house _____ we visited last summer was renovated.'?",
+        "options": [
+            "who",
+            "whom",
+            "that",
+            "whose"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Reduce the adjective clause in this sentence correctly: 'The students who are studying in the library are preparing for the exam.'",
+        "options": [
+            "The students studying in the library are preparing for the exam.",
+            "The students, studying in the library, are preparing for the exam.",
+            "The students who studying in the library are preparing for the exam.",
+            "The students study in the library are preparing for the exam."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Which sentence contains a dangling modifier that needs correction?",
+        "options": [
+            "The man who stole the car was arrested.",
+            "Walking to school, the rain started to pour.",
+            "The book that I borrowed was interesting.",
+            "The teacher, who teaches English, is kind."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence correctly combines these two sentences using an adjective clause: 'This is the hospital. I was born here.'?",
+        "options": [
+            "This is the hospital where I was born.",
+            "This is the hospital which I was born.",
+            "This is the hospital that I was born in it.",
+            "This is the hospital whom I was born."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Which sentence uses 'whom' correctly in an adjective clause?",
+        "options": [
+            "The teacher whom I met yesterday is very kind.",
+            "The teacher whom teaches English is very kind.",
+            "The teacher whom my friend is very kind.",
+            "The teacher whom I saw her yesterday is very kind."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Which sentence correctly uses a preposition with an adjective clause?",
+        "options": [
+            "The university which I study is Mahidol.",
+            "The university at which I study is Mahidol.",
+            "The university where I study at is Mahidol.",
+            "The university whom I study at is Mahidol."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence demonstrates a non-restrictive adjective clause used as a sentence modifier?",
+        "options": [
+            "I got an A in my programming class, which surprised me!",
+            "The book that I read was amazing.",
+            "The man who stole the car was arrested.",
+            "The house where I live is old."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Which sentence incorrectly uses a relative pronoun, creating a grammatical error?",
+        "options": [
+            "The girl whose dog ran away was sad.",
+            "The movie which we watched was scary.",
+            "The teacher who teaches English is kind.",
+            "The book whom I read was amazing."
+        ],
+        "answer": 3
+    },  {
+        "question": "Which sentence contains a noun clause functioning as the subject?",
+        "options": [
+            "The teacher explained why the exam was postponed.",
+            "What she said surprised everyone in the room.",
+            "The boy who won the race is my friend.",
+            "I smiled because the news was exciting."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence uses a noun clause as a predicate nominative correctly?",
+        "options": [
+            "The goal is that we finish the project by tomorrow.",
+            "The happiest moment was when I adopted my dog.",
+            "The book that I read was fascinating.",
+            "I know where she went after the party."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence incorrectly uses a noun clause, causing a grammatical error?",
+        "options": [
+            "I don’t know whom she invited to the event.",
+            "She believes that the meeting is tomorrow.",
+            "What I want to do is go home and sleep.",
+            "I wonder why did she leave early."
+        ],
+        "answer": 3
+    },
+    {
+        "question": "Which sentence contains a noun clause that can be reduced to an infinitive phrase?",
+        "options": [
+            "I want to know which book my sister chose.",
+            "She explained how we should prepare for the test.",
+            "They didn’t tell me who attended the meeting.",
+            "I believe that the plan will succeed."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence correctly distinguishes a noun clause from an adjective clause?",
+        "options": [
+            "The car that I bought is very fast. (adjective clause)",
+            "The car which is red is mine. (noun clause)",
+            "I know that the car is expensive. (adjective clause)",
+            "The car whose owner is my friend is parked outside. (noun clause)"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Which introductory word is correctly used in this sentence: 'I’m not sure _____ I should invest my money.'?",
+        "options": [
+            "who",
+            "where",
+            "whether",
+            "that"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Which sentence contains a noun clause functioning as the object of a preposition?",
+        "options": [
+            "She gave a gift to whoever won the competition.",
+            "I don’t know what she said during the meeting.",
+            "That the team won is a fact.",
+            "The teacher explained why the homework was due."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Which sentence demonstrates a noun clause that cannot be reduced because of differing subjects?",
+        "options": [
+            "I want to know how I should solve this problem.",
+            "She asked what her brother was doing.",
+            "This book tells you how to cook Thai food.",
+            "He decided what to wear for the party."
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Which sentence uses a noun clause informally by omitting the introductory word?",
+        "options": [
+            "I believe she will win the award.",
+            "I know that she is very talented.",
+            "What you said was surprising.",
+            "I wonder why she left early."
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Which sentence correctly uses a noun clause as an indirect object?",
+        "options": [
+            "The judge gave whoever scored the highest a trophy.",
+            "I don’t know where the meeting will be held.",
+            "She believes that the plan is effective.",
+            "The teacher explained what the assignment was."
+        ],
+        "answer": 0
+    },    {
+        "question": "คำศัพท์ 'Adapt' มีความหมายว่าอย่างไร?",
+        "options": [
+            "make (something) suitable for a new use or purpose; modify",
+            "have an effect on; make a difference to",
+            "a serious disagreement or argument",
+            "a place, person, or thing from which something comes"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Conflict' มีความหมายว่าอย่างไร?",
+        "options": [
+            "a means of approaching or entering a place",
+            "a serious disagreement or argument, typically a protracted one",
+            "the maximum amount that something can contain",
+            "having knowledge or perception of a situation or fact"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "คำศัพท์ 'Fundamental' มีความหมายว่าอย่างไร?",
+        "options": [
+            "forming a necessary base or core; of central importance",
+            "individually separate and distinct",
+            "a result or effect of an action or condition",
+            "the state of being strikingly different from something else"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Access' มีความหมายว่าอย่างไร?",
+        "options": [
+            "a means of approaching or entering a place",
+            "the quality of being worthy of attention; importance",
+            "having the ability, fitness, or quality necessary to do something",
+            "a central or primary rule or principle"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Consequences' มีความหมายว่าอย่างไร?",
+        "options": [
+            "an abstract idea; a general notion",
+            "a result or effect of an action or condition",
+            "special importance, value, or prominence given to something",
+            "marked by exactness and accuracy of expression or detail"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "คำศัพท์ 'Aware' มีความหมายว่าอย่างไร?",
+        "options": [
+            "having knowledge or perception of a situation or fact",
+            "based on or in accordance with what is generally done",
+            "a distinctive attribute or aspect of something",
+            "come into forcible contact with another object"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Acknowledge' มีความหมายว่าอย่างไร?",
+        "options": [
+            "accept or admit the existence or truth of",
+            "fix or attach (something) firmly so that it cannot be moved",
+            "differ in size, amount, degree, or nature",
+            "an approximate calculation or judgment of value"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Process' มีความหมายว่าอย่างไร?",
+        "options": [
+            "a series of actions or steps taken to achieve a particular end",
+            "the power or right to give orders and make decisions",
+            "send (goods or services) to another country for sale",
+            "lying or situated under something"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Crucial' มีความหมายว่าอย่างไร?",
+        "options": [
+            "decisive or critical, especially in the success or failure of something",
+            "clearly visible or understood; obvious",
+            "give shares of (something); deal out",
+            "take or carry (people or goods) from one place to another"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Capacity' มีความหมายว่าอย่างไร?",
+        "options": [
+            "the maximum amount that something can contain",
+            "a verbal or written answer",
+            "be incompatible or at variance; clash",
+            "a particular form of procedure for accomplishing something"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Secure' มีความหมายว่าอย่างไร?",
+        "options": [
+            "an unexpected or casual meeting with someone",
+            "fixed or fastened so as not to give way, become loose, or be lost",
+            "of chief importance; principal",
+            "a serious disagreement or argument"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "คำศัพท์ 'Features' มีความหมายว่าอย่างไร?",
+        "options": [
+            "a distinctive attribute or aspect of something",
+            "the end or finish of an event or process",
+            "roughly calculate or judge the value or quantity",
+            "consisting of many different and connected parts"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Apparent' มีความหมายว่าอย่างไร?",
+        "options": [
+            "clearly visible or understood; obvious",
+            "give (someone) the authority or means to do something",
+            "a place, person, or thing from which something comes",
+            "having or showing the capacity to develop in the future"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Method' มีความหมายว่าอย่างไร?",
+        "options": [
+            "a particular form of procedure for accomplishing or approaching something",
+            "the state or condition of physical touching",
+            "a result or effect of an action or condition",
+            "marked by exactness and accuracy of expression"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Encounter' มีความหมายว่าอย่างไร?",
+        "options": [
+            "unexpectedly experience or be faced with (something difficult or hostile)",
+            "forming a necessary base or core; of central importance",
+            "special importance, value, or prominence given to something",
+            "send (goods or services) to another country for sale"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Emphasis' มีความหมายว่าอย่างไร?",
+        "options": [
+            "special importance, value, or prominence given to something",
+            "differ strikingly",
+            "the power or right to give orders and make decisions",
+            "act in such a way as to have an effect on another"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Export' มีความหมายว่าอย่างไร?",
+        "options": [
+            "send (goods or services) to another country for sale",
+            "a series of actions or steps taken to achieve a particular end",
+            "an important topic or problem for debate or discussion",
+            "having knowledge or perception of a situation or fact"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Contrast' มีความหมายว่าอย่างไร?",
+        "options": [
+            "the state of being strikingly different from something else in juxtaposition",
+            "a central or primary rule or principle",
+            "be incompatible or at variance; clash",
+            "a verbal or written answer"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Potential' มีความหมายว่าอย่างไร?",
+        "options": [
+            "having or showing the capacity to become or develop into something in the future",
+            "clearly visible or understood; obvious",
+            "a distinctive attribute or aspect of something",
+            "take or carry (people or goods) from one place to another"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Issues' มีความหมายว่าอย่างไร?",
+        "options": [
+            "an important topic or problem for debate or discussion",
+            "consisting of many different and connected parts",
+            "the maximum amount that something can contain",
+            "fix or attach (something) firmly so that it cannot be moved"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Complex' มีความหมายว่าอย่างไร?",
+        "options": [
+            "consisting of many different and connected parts",
+            "a sign or piece of information that indicates something",
+            "a serious disagreement or argument",
+            "supply or distribute (something)"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Precise' มีความหมายว่าอย่างไร?",
+        "options": [
+            "marked by exactness and accuracy of expression or detail",
+            "the quality of being worthy of attention; importance",
+            "act in such a way as to have an effect on another",
+            "a place, person, or thing from which something comes"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Significance' มีความหมายว่าอย่างไร?",
+        "options": [
+            "the quality of being worthy of attention; importance",
+            "an approximate calculation or judgment of value",
+            "based on or in accordance with what is generally done",
+            "a series of actions or steps taken to achieve a particular end"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Distribute' มีความหมายว่าอย่างไร?",
+        "options": [
+            "give shares of (something); deal out",
+            "differ in size, amount, degree, or nature",
+            "a result or effect of an action or condition",
+            "having the ability, fitness, or quality necessary to do something"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "คำศัพท์ 'Authority' มีความหมายว่าอย่างไร?",
+        "options": [
+            "the power or right to give orders, make decisions, and enforce obedience",
+            "an unexpected or casual meeting with someone",
+            "individually separate and distinct",
+            "a distinctive attribute or aspect of something"
+        ],
+        "answer": 0
+    }
+            ];
+
+            let currentQuestionId = 0;
+            let answers = {};
+            let feedbackShown = {};
+            let score = 0;
+
+            const quizContainer = document.getElementById("quiz-container");
+            const questionButtonsContainer = document.getElementById("question-buttons");
+            const questionButtonsSection = document.getElementById("question-buttons-section");
+            const navigationButtons = document.getElementById("navigation-buttons");
+            const prevButton = document.getElementById("prev-button");
+            const nextButton = document.getElementById("next-button");
+            const submitButton = document.getElementById("submit-button");
+            const resultsSection = document.getElementById("results-section");
+            const scoreText = document.getElementById("score-text");
+            const resultsDetails = document.getElementById("results-details");
+            const restartButton = document.getElementById("restart-button");
+
+            function initQuiz() {
+                quizContainer.innerHTML = "";
+                questionButtonsContainer.innerHTML = "";
+                answers = {};
+                feedbackShown = {};
+                score = 0;
+
+                quizData.forEach((q, index) => {
+                    const questionDiv = document.createElement("div");
+                    questionDiv.id = `question-${index}`;
+                    questionDiv.className = "quiz-question" + (index !== 0 ? " hidden" : "");
+                    questionDiv.innerHTML = `
+                        <h3 class="text-lg font-medium mb-2 text-indigo-800">คำถามที่ ${index + 1} จาก ${quizData.length}</h3>
+                        <p class="text-base mb-4">${q.question}</p>
+                        <div class="space-y-3">
+                            ${q.options.map((option, i) => `
+                                <div class="radio-option">
+                                    <input type="radio" id="q${index}-${i}" name="q${index}" value="${i}">
+                                    <label for="q${index}-${i}">${option}</label>
+                                </div>
+                            `).join("")}
+                        </div>
+                        <div class="feedback hidden" id="feedback-${index}"></div>
+                    `;
+                    quizContainer.appendChild(questionDiv);
+
+                    const button = document.createElement("button");
+                    button.className = "question-button" + (index === 0 ? " active" : "");
+                    button.dataset.question = index;
+                    button.textContent = index + 1;
+                    button.addEventListener("click", () => showQuestion(Number(button.dataset.question)));
+                    questionButtonsContainer.appendChild(button);
+                });
+
+                prevButton.addEventListener("click", () => {
+                    if (currentQuestionId > 0) showQuestion(currentQuestionId - 1);
+                });
+
+                nextButton.addEventListener("click", () => {
+                    const selected = document.querySelector(`input[name="q${currentQuestionId}"]:checked`);
+                    if (selected) submitAnswer();
+                    if (currentQuestionId < quizData.length - 1) {
+                        showQuestion(currentQuestionId + 1);
+                    } else {
+                        updateSubmitButton();
+                    }
+                });
+
+                submitButton.addEventListener("click", showResults);
+
+                restartButton.addEventListener("click", () => {
+                    resultsSection.style.display = "none";
+                    quizContainer.style.display = "block";
+                    questionButtonsSection.style.display = "block";
+                    navigationButtons.style.display = "flex";
+                    initQuiz();
+                });
+
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener("change", () => {
+                        submitAnswer();
+                        updateSubmitButton();
+                    });
+                });
+
+                showQuestion(0);
+            }
+
+            function showQuestion(id) {
+                document.querySelectorAll(".quiz-question").forEach(q => q.classList.add("hidden"));
+                document.getElementById(`question-${id}`).classList.remove("hidden");
+
+                document.querySelectorAll(".question-button").forEach(btn => {
+                    btn.classList.remove("active");
+                    if (Number(btn.dataset.question) === id) btn.classList.add("active");
+                });
+
+                currentQuestionId = id;
+                prevButton.disabled = id === 0;
+                nextButton.disabled = id === quizData.length - 1 && feedbackShown[id];
+                submitButton.classList.toggle("hidden", id !== quizData.length - 1 || Object.keys(answers).length === 0);
+                nextButton.classList.toggle("hidden", id === quizData.length - 1 && feedbackShown[id]);
+                updateSubmitButton();
+            }
+
+            function submitAnswer() {
+                const selected = document.querySelector(`input[name="q${currentQuestionId}"]:checked`);
+                if (!selected) return;
+
+                const answer = Number(selected.value);
+                if (answers[currentQuestionId] !== undefined && answers[currentQuestionId] === quizData[currentQuestionId].answer) {
+                    score--;
+                }
+                answers[currentQuestionId] = answer;
+                feedbackShown[currentQuestionId] = true;
+
+                const question = quizData[currentQuestionId];
+                const isCorrect = answer === question.answer;
+
+                if (isCorrect) score++;
+
+                const feedbackDiv = document.getElementById(`feedback-${currentQuestionId}`);
+                feedbackDiv.classList.remove("hidden");
+                feedbackDiv.classList.add(isCorrect ? "correct" : "incorrect");
+                feedbackDiv.innerHTML = `
+                    <div class="flex items-center gap-2 font-medium">
+                        ${isCorrect ? `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>ถูกต้อง!</span>
+                        ` : `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 IFICATE cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                            <span>ไม่ถูกต้อง</span>
+                        `}
+                    </div>
+                    <p class="mt-1 text-sm">
+                        ${isCorrect ? "ยอดเยี่ยม! คุณเลือกคำตอบที่ถูกต้อง" : `คำตอบที่ถูกต้องคือ ${question.options[question.answer]}`}
+                    </p>
+                `;
+
+                document.querySelectorAll(`#question-${currentQuestionId} .radio-option`).forEach((option, i) => {
+                    const input = option.querySelector("input");
+                    input.disabled = true;
+                    if (i === question.answer) option.classList.add("correct");
+                    else if (i === answer && !isCorrect) option.classList.add("incorrect");
+                });
+
+                const button = document.querySelector(`.question-button[data-question="${currentQuestionId}"]`);
+                button.classList.remove("correct", "incorrect");
+                button.classList.add(isCorrect ? "correct" : "incorrect");
+
+                updateSubmitButton();
+            }
+
+            function updateSubmitButton() {
+                const allAnswered = Object.keys(answers).length === quizData.length;
+                submitButton.disabled = !allAnswered;
+                if (currentQuestionId === quizData.length - 1) {
+                    submitButton.classList.remove("hidden");
+                    nextButton.classList.toggle("hidden", feedbackShown[currentQuestionId]);
+                }
+            }
+
+            function showResults() {
+                quizContainer.style.display = "none";
+                questionButtonsSection.style.display = "none";
+                navigationButtons.style.display = "none";
+                resultsSection.style.display = "block";
+
+                scoreText.textContent = `คุณได้คะแนน ${score} จาก ${quizData.length} คะแนน (${(score / quizData.length * 100).toFixed(2)}%)`;
+
+                resultsDetails.innerHTML = quizData.map((q, i) => `
+                    <div class="mb-4">
+                        <p class="font-medium ${answers[i] === q.answer ? "text-green-600" : "text-red-600"}">
+                            คำถาม ${i + 1}: ${q.question}
+                        </p>
+                        <p>คำตอบของคุณ: ${answers[i] !== undefined ? q.options[answers[i]] : "ไม่ได้ตอบ"}</p>
+                        <p>คำตอบที่ถูกต้อง: ${q.options[q.answer]}</p>
+                    </div>
+                `).join("");
+            }
+
+            initQuiz();
+        });
+    </script>
+</body>
+</html>

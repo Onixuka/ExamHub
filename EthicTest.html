@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structures</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5e17eb',
+                        secondary: '#1a1a1a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 1px solid #e0e7ff;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .radio-option:hover {
+            background-color: #eef2ff;
+        }
+        .radio-option.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+        }
+        .radio-option.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.375rem;
+        }
+        .feedback.correct {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #b91c1c;
+        }
+        .question-button {
+            height: 2.5rem;
+            width: 2.5rem;
+            padding: 0;
+            font-weight: 500;
+            border-radius: 0.375rem;
+            border: 1px solid #c7d2fe;
+            background-color: #ffffff;
+            cursor: pointer;
+        }
+        .question-button.active {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+            color: #ffffff;
+            border-color: #5e17eb;
+        }
+        .question-button.correct {
+            background-color: #10b981;
+            color: #ffffff;
+            border-color: #10b981;
+        }
+        .question-button.incorrect {
+            background-color: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+        #results-section {
+            display: none;
+        }
+    </style>
+</head>
+<body class="font-sans bg-indigo-50/30">
+    <div class="flex flex-col min-h-screen">
+        <header class="sticky top-0 z-10 border-b bg-white shadow-sm">
+            <div class="container mx-auto flex h-16 items-center px-4 max-w-7xl">
+                <a href="ExamHub.html" class="flex items-center gap-2 font-bold text-xl text-indigo-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-6 w-6 text-indigo-600">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                    <span>ExamHub</span>
+                </a>
+            </div>
+        </header>
+        <main class="flex-1 container mx-auto py-8 px-4 max-w-4xl">
+            <div class="flex flex-col items-start gap-4 mb-8">
+                <div class="flex items-center gap-2">
+                    <a href="subject.html" class="text-indigo-700 hover:text-indigo-800 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="m12 19-7-7 7-7"></path>
+                            <path d="M19 12H5"></path>
+                        </svg>
+                        กลับไปที่ วิชาทั้งหมด
+                    </a>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight text-gradient">Fundamentals of Computer Ethics</h1>
+                <p class="text-gray-500">ตอบคำถามด้านล่าง คุณสามารถเลือกคำถามได้จากรายการคำถาม</p>
+            </div>
+            <div class="grid grid-cols-1 gap-6">
+                <div class="bg-white rounded-lg border border-indigo-100 shadow-sm overflow-hidden">
+                    <div class="p-6" id="quiz-container">
+                        <!-- Questions will be dynamically inserted here -->
+                    </div>
+                    <div class="flex justify-between p-4 border-t border-indigo-100" id="navigation-buttons">
+                        <button id="prev-button" class="px-4 py-2 border border-indigo-200 text-indigo-700 rounded-md hover:bg-indigo-50 hover:text-indigo-800 disabled:opacity-50" disabled>ก่อนหน้า</button>
+                        <button id="next-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90">ถัดไป</button>
+                        <button id="submit-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90 hidden" disabled>ส่งคำตอบ</button>
+                    </div>
+                </div>
+                <div id="question-buttons-section">
+                    <h2 class="text-lg font-semibold mb-4 text-indigo-800">คำถาม</h2>
+                    <div class="flex flex-wrap gap-2" id="question-buttons">
+                        <!-- Question buttons will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div id="results-section" class="bg-white rounded-lg border border-indigo-100 shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-indigo-800">ผลลัพธ์</h2>
+                        <button id="restart-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90">เริ่มใหม่</button>
+                    </div>
+                    <p id="score-text" class="text-lg mb-4"></p>
+                    <div id="results-details"></div>
+                </div>
+            </div>
+        </main>
+        <footer class="border-t py-6 bg-white">
+            <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4 max-w-7xl">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-5 w-5 text-indigo-600">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                    <span class="font-semibold text-indigo-800">ExamHub</span>
+                </div>
+                <p class="text-sm text-gray-500">© <span id="current-year"></span> ExamHub. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("current-year").textContent = new Date().getFullYear();
+
+            const quizData = [
+            {
+        "question": "จริยธรรมทางธุรกิจ (Business Ethics) มีความสำคัญอย่างไรต่อองค์กร?",
+        "options": [
+            "ช่วยลดต้นทุนการดำเนินงานขององค์กร",
+            "สร้างความไว้วางใจและความยั่งยืนให้กับองค์กร",
+            "เพิ่มจำนวนลูกค้าอย่างรวดเร็วในระยะสั้น",
+            "ลดความรับผิดชอบต่อสังคมขององค์กร"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในกรอบ The Fraud Triangle ปัจจัยใดที่เกี่ยวข้องกับ 'แรงกดดัน' ที่ผลักดันให้เกิดการทุจริต?",
+        "options": [
+            "โอกาสในการกระทำผิดโดยไม่ถูกจับได้",
+            "การหาเหตุผลส่วนตัวเพื่อสนับสนุนการกระทำผิด",
+            "แรงจูงใจทางการเงินหรืออารมณ์",
+            "การมีนโยบายต่อต้านการทุจริตในองค์กร"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ตามนโยบายของมหาวิทยาลัยมหิดล หลักการใดต่อไปนี้ไม่ใช่ส่วนหนึ่งของนโยบายต่อต้านการทุจริต?",
+        "options": [
+            "ความซื่อสัตย์",
+            "ความโปร่งใส",
+            "ความเป็นธรรม",
+            "การเพิ่มผลกำไรสูงสุด"
+        ],
+        "answer": 3
+    },
+    {
+        "question": "The Fraud Triangle ใช้เพื่อวัตถุประสงค์ใด?",
+        "options": [
+            "วิเคราะห์ความเสี่ยงของการทุจริตในสถานการณ์ต่างๆ",
+            "กำหนดนโยบายการเงินขององค์กร",
+            "พัฒนากลยุทธ์การตลาดสำหรับผลิตภัณฑ์ใหม่",
+            "ประเมินประสิทธิภาพของพนักงาน"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "จรรยาบรรณ (Code of Conduct) ของมหาวิทยาลัยมหิดลครอบคลุมบุคคลกลุ่มใดบ้าง?",
+        "options": [
+            "เฉพาะคณาจารย์และนักศึกษา",
+            "ผู้บริหาร คณาจารย์ นักวิจัย พนักงาน และนักศึกษา",
+            "เฉพาะผู้บริหารและพนักงาน",
+            "เฉพาะนักวิจัยและนักศึกษา"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ปัจจัย 'โอกาส' (Opportunity) ใน The Fraud Triangle หมายถึงอะไร?",
+        "options": [
+            "ความสามารถในการกระทำผิดโดยไม่ถูกจับได้",
+            "แรงจูงใจจากความต้องการทางการเงิน",
+            "การหาเหตุผลเพื่อสนับสนุนการกระทำผิด",
+            "นโยบายที่เข้มงวดขององค์กร"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "ตามเอกสาร มหาวิทยาลัยมหิดลมีเป้าหมายอะไรจากการยึดมั่นในจริยธรรมและความรับผิดชอบต่อสังคม?",
+        "options": [
+            "เพิ่มจำนวนนักศึกษาต่างชาติ",
+            "ลดค่าใช้จ่ายในการบริหาร",
+            "บรรลุเป้าหมายการพัฒนาที่ยั่งยืน",
+            "เพิ่มผลกำไรจากการวิจัย"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "การหาเหตุผลส่วนตัว (Rationalization) ใน The Fraud Triangle หมายถึงอะไร?",
+        "options": [
+            "การมีโอกาสกระทำผิดโดยไม่ถูกจับได้",
+            "การโน้มน้าวตนเองว่าการกระทำผิดนั้นสมเหตุสมผล",
+            "แรงกดดันจากปัญหาการเงิน",
+            "การกำหนดนโยบายต่อต้านการทุจริต"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "นโยบายต่อต้านการทุจริตของมหาวิทยาลัยมหิดลเน้นหลักการใดเป็นสำคัญ?",
+        "options": [
+            "ความรวดเร็วในการตัดสินใจ",
+            "ความซื่อสัตย์ ความโปร่งใส ความเป็นธรรม และการตรวจสอบได้",
+            "การเพิ่มประสิทธิภาพการทำงาน",
+            "การลดความรับผิดชอบต่อสังคม"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "เหตุใดกรอบ The Fraud Triangle จึงมีความสำคัญต่อการบริหารจัดการความเสี่ยงในองค์กร?",
+        "options": [
+            "ช่วยระบุปัจจัยที่อาจนำไปสู่การทุจริตและป้องกันได้",
+            "เพิ่มความสามารถในการแข่งขันในตลาด",
+            "ลดความจำเป็นในการตรวจสอบภายใน",
+            "สนับสนุนการตัดสินใจด้านการเงินโดยไม่คำนึงถึงจริยธรรม"
+        ],
+        "answer": 0
+    },    {
+        "question": "จริยธรรมทางการเงิน (Financial Ethics) มีบทบาทอย่างไรในการตรวจสอบบัญชี?",
+        "options": [
+            "ลดความจำเป็นในการตรวจสอบภายใน",
+            "รับประกันความโปร่งใสและความซื่อสัตย์ในรายงานทางการเงิน",
+            "เพิ่มผลกำไรขององค์กรโดยตรง",
+            "ลดต้นทุนการตรวจสอบบัญชี"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "กรณี Forex-3D เป็นตัวอย่างของการทุจริตทางการเงินประเภทใด?",
+        "options": [
+            "การฟอกเงิน",
+            "การฉ้อโกงแบบ Ponzi Scheme",
+            "การยักยอกทรัพย์",
+            "การปลอมแปลงเอกสาร"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในบริบทของการตรวจสอบบัญชี หลักจริยธรรมใดที่ผู้ตรวจสอบต้องยึดถือเป็นสำคัญ?",
+        "options": [
+            "ความเป็นอิสระ (Independence)",
+            "การเพิ่มผลกำไรให้ลูกค้า",
+            "การปกปิดข้อมูลที่เป็นความลับ",
+            "การลดระยะเวลาในการตรวจสอบ"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "จากกรณี Forex-3D ปัจจัยใดใน The Fraud Triangle มีส่วนสำคัญที่ทำให้เกิดการทุจริต?",
+        "options": [
+            "โอกาส (Opportunity) จากการขาดการกำกับดูแล",
+            "ความโปร่งใสในระบบการเงิน",
+            "นโยบายต่อต้านการทุจริตที่เข้มงวด",
+            "การตรวจสอบภายในที่มีประสิทธิภาพ"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "การตรวจสอบบัญชีที่มีจริยธรรมจะช่วยป้องกันปัญหาใดในองค์กร?",
+        "options": [
+            "การสูญเสียลูกค้า",
+            "การทุจริตและความผิดพลาดในรายงานทางการเงิน",
+            "การลดลงของราคาหุ้น",
+            "การขาดแคลนพนักงาน"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในกรณี Forex-3D ผู้กระทำผิดใช้กลยุทธ์ใดเพื่อหลอกลวงนักลงทุน?",
+        "options": [
+            "สัญญาว่าจะให้ผลตอบแทนสูงในเวลาอันสั้น",
+            "เปิดเผยข้อมูลทางการเงินอย่างโปร่งใส",
+            "ปฏิบัติตามกฎหมายการเงินอย่างเคร่งครัด",
+            "จัดตั้งคณะกรรมการตรวจสอบอิสระ"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "เหตุใดความเป็นอิสระ (Independence) จึงสำคัญต่อผู้ตรวจสอบบัญชี?",
+        "options": [
+            "เพื่อให้สามารถปกปิดข้อผิดพลาดของลูกค้าได้",
+            "เพื่อรักษาความเป็นกลางและป้องกันผลประโยชน์ทับซ้อน",
+            "เพื่อลดค่าใช้จ่ายในการตรวจสอบ",
+            "เพื่อเพิ่มความเร็วในการตรวจสอบ"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "การทุจริตในกรณี Forex-3D สามารถป้องกันได้อย่างไรตามหลักจริยธรรมทางการเงิน?",
+        "options": [
+            "เพิ่มการโฆษณาเพื่อดึงดูดนักลงทุน",
+            "เสริมสร้างการกำกับดูแลและการตรวจสอบอย่างเข้มงวด",
+            "ลดการรายงานทางการเงินต่อหน่วยงานกำกับ",
+            "สนับสนุนให้ผู้ลงทุนยอมรับความเสี่ยงสูง"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "หลักการใดในจริยธรรมทางการเงินที่ช่วยลดความเสี่ยงจากการหาเหตุผลส่วนตัว (Rationalization) ใน The Fraud Triangle?",
+        "options": [
+            "การสร้างวัฒนธรรมองค์กรที่เน้นความซื่อสัตย์",
+            "การเพิ่มโบนัสให้พนักงาน",
+            "การลดการตรวจสอบภายใน",
+            "การเพิ่มโอกาสในการลงทุนที่มีความเสี่ยง"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "จากมุมมองของจริยธรรมทางการเงิน การตรวจสอบบัญชีที่มีประสิทธิภาพควรมีลักษณะใด?",
+        "options": [
+            "มุ่งเน้นที่การปกป้องผลประโยชน์ของผู้บริหาร",
+            "ให้ความสำคัญกับความถูกต้องและความโปร่งใสของข้อมูล",
+            "ลดการเปิดเผยข้อมูลต่อสาธารณะ",
+            "มุ่งเน้นที่การลดต้นทุนขององค์กรเท่านั้น"
+        ],
+        "answer": 1
+    },{
+        "question": "โมเดลธุรกิจอีคอมเมิร์ซประเภทใดที่เกี่ยวข้องกับการขายระหว่างบุคคลต่อบุคคล?",
+        "options": [
+            "Business to Consumer (B2C)",
+            "Consumer to Consumer (C2C)",
+            "Business to Business (B2B)",
+            "Consumer to Business (C2B)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "แพลตฟอร์มใดถูกกล่าวถึงซ้ำๆ ในสไลด์ว่าเป็นตัวอย่างของตลาดอีคอมเมิร์ซ?",
+        "options": [
+            "Amazon",
+            "Lazada",
+            "eBay",
+            "Etsy"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม Southeast Asia E-commerce Snapshot แหล่งข้อมูลใดไม่ได้ถูกอ้างถึง?",
+        "options": [
+            "Priceza",
+            "Meta",
+            "Google",
+            "Bain and Company"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ประเด็นจริยธรรมที่สำคัญในอีคอมเมิร์ซคืออะไร?",
+        "options": [
+            "การเพิ่มผลกำไรสูงสุด",
+            "การปกป้องความเป็นส่วนตัวของข้อมูลผู้บริโภค",
+            "การเพิ่มปริมาณการเข้าชมเว็บไซต์",
+            "การลดต้นทุนการดำเนินงาน"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "โมเดลอีคอมเมิร์ซใดที่เกี่ยวข้องกับการที่ผู้บริโภคเสนอบริการหรือผลิตภัณฑ์ให้กับธุรกิจ?",
+        "options": [
+            "Business to Consumer (B2C)",
+            "Consumer to Business (C2B)",
+            "Business to Business (B2B)",
+            "Consumer to Consumer (C2C)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ปีใดที่ไม่ได้ปรากฏในลำดับปีบนหน้า 6 ของสไลด์?",
+        "options": [
+            "2024",
+            "2025",
+            "2026",
+            "2030"
+        ],
+        "answer": 3
+    },
+    {
+        "question": "หนังสือเล่มใดถูกอ้างถึงในสไลด์สำหรับการอ่านเพิ่มเติมเกี่ยวกับอีคอมเมิร์ซ?",
+        "options": [
+            "E-commerce 2017: Business, Technology, Society",
+            "Digital Marketing Strategies",
+            "Online Business Fundamentals",
+            "Web Development Essentials"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "ประเด็นจริยธรรมที่อาจเกิดขึ้นในโมเดล C2B คืออะไร?",
+        "options": [
+            "ค่าขนส่งสูง",
+            "การบิดเบือนคุณภาพผลิตภัณฑ์โดยผู้บริโภค",
+            "ความพร้อมของผลิตภัณฑ์จำกัด",
+            "เวลาโหลดเว็บไซต์ช้า"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "องค์กรใดที่เกี่ยวข้องกับสไลด์การบรรยาย?",
+        "options": [
+            "Harvard University",
+            "Mahidol University",
+            "Stanford University",
+            "MIT"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "เว็บไซต์ใดถูกอ้างถึงเป็นแหล่งข้อมูลเกี่ยวกับแนวโน้มของภาคอีคอมเมิร์ซ?",
+        "options": [
+            "cnn.com",
+            "bangkokpost.com",
+            "bbc.com",
+            "forbes.com"
+        ],
+        "answer": 1
+    },{
+        "question": "ตามพระราชบัญญัติคุ้มครองข้อมูลส่วนบุคคล (PDPA) ข้อมูลส่วนบุคคลที่อ่อนไหว (Sensitive Personal Data) รวมถึงข้อใดต่อไปนี้?",
+        "options": [
+            "ชื่อและนามสกุล",
+            "ข้อมูลเกี่ยวกับความเชื่อทางศาสนา",
+            "ที่อยู่อีเมล",
+            "หมายเลขโทรศัพท์"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตามสไลด์บรรยาย PDPA ข้อใดเป็นหลักการสำคัญในการประมวลผลข้อมูลส่วนบุคคล?",
+        "options": [
+            "การเก็บข้อมูลโดยไม่แจ้งวัตถุประสงค์",
+            "ความโปร่งใสและความรับผิดชอบ",
+            "การใช้ข้อมูลเพื่อการโฆษณาโดยไม่ได้รับอนุญาต",
+            "การจำกัดการเข้าถึงข้อมูลภายในองค์กร"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในบริบทของ PDPA ผู้ควบคุมข้อมูลส่วนบุคคล (Data Controller) มีหน้าที่อะไรเป็นหลัก?",
+        "options": [
+            "จัดเก็บข้อมูลโดยไม่ต้องแจ้งเจ้าของข้อมูล",
+            "กำหนดวัตถุประสงค์และวิธีการประมวลผลข้อมูลส่วนบุคคล",
+            "ส่งต่อข้อมูลให้บุคคลที่สามโดยไม่ต้องขออนุญาต",
+            "ตรวจสอบความปลอดภัยของระบบโดยไม่เกี่ยวข้องกับข้อมูล"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม PDPA การประมวลผลข้อมูลส่วนบุคคลต้องได้รับความยินยอมจากเจ้าของข้อมูล เว้นแต่ในกรณีใด?",
+        "options": [
+            "เพื่อการโฆษณาทางการตลาด",
+            "เพื่อปฏิบัติตามกฎหมาย",
+            "เพื่อการวิเคราะห์ข้อมูลภายใน",
+            "เพื่อการแบ่งปันข้อมูลกับพันธมิตร"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "สไลด์ PDPA อ้างถึงกฎระเบียบใดจากสหภาพยุโรปที่เป็นต้นแบบ?",
+        "options": [
+            "CCPA (California Consumer Privacy Act)",
+            "GDPR (General Data Protection Regulation)",
+            "HIPAA (Health Insurance Portability and Accountability Act)",
+            "COPPA (Children's Online Privacy Protection Act)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม PDPA การละเมิดการคุ้มครองข้อมูลส่วนบุคคลอาจนำไปสู่บทลงโทษประเภทใด?",
+        "options": [
+            "การปรับปรุงระบบไอที",
+            "โทษปรับทางแพ่งและอาญา",
+            "การเพิ่มงบประมาณด้านความปลอดภัย",
+            "การอบรมพนักงานใหม่"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในสไลด์ PDPA ข้อมูลส่วนบุคคลที่อ่อนไหว เช่น ข้อมูลชีวภาพ (Biometric Data) ต้องได้รับการปกป้องในระดับใด?",
+        "options": [
+            "ระดับทั่วไปเทียบเท่าข้อมูลติดต่อ",
+            "ระดับสูงกว่าข้อมูลส่วนบุคคลทั่วไป",
+            "ระดับเดียวกับข้อมูลทางการเงิน",
+            "ไม่จำเป็นต้องปกป้องเป็นพิเศษ"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม PDPA เจ้าของข้อมูลมีสิทธิอะไรในการควบคุมข้อมูลส่วนบุคคลของตน?",
+        "options": [
+            "สิทธิในการขอให้เก็บข้อมูลเพิ่มเติม",
+            "สิทธิในการขอเข้าถึงและแก้ไขข้อมูล",
+            "สิทธิในการจำกัดการเก็บข้อมูลทั้งหมด",
+            "สิทธิในการยกเลิกการประมวลผลข้อมูลโดยอัตโนมัติ"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "สไลด์ PDPA ระบุว่าใครเป็นผู้รับผิดชอบในการแจ้งการละเมิดข้อมูล (Data Breach) ต่อสำนักงานคณะกรรมการคุ้มครองข้อมูลส่วนบุคคล?",
+        "options": [
+            "ผู้ประมวลผลข้อมูลส่วนบุคคล (Data Processor)",
+            "ผู้ควบคุมข้อมูลส่วนบุคคล (Data Controller)",
+            "เจ้าของข้อมูลส่วนบุคคล",
+            "หน่วยงานกำกับดูแลโดยตรง"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม PDPA การโอนข้อมูลส่วนบุคคลไปยังต่างประเทศต้องปฏิบัติตามเงื่อนไขใด?",
+        "options": [
+            "ต้องโอนผ่านระบบคลาวด์เท่านั้น",
+            "ต้องได้รับความยินยอมจากเจ้าของข้อมูลหรือมีมาตรการคุ้มครองที่เพียงพอ",
+            "ต้องโอนให้เฉพาะประเทศในอาเซียน",
+            "ไม่ต้องมีเงื่อนไขใดๆ หากเป็นการโอนภายในองค์กร"
+        ],
+        "answer": 1
+    }, {
+        "question": "ตาม ACM Code of Ethics หลักการใดในหมวด Public Interest เน้นย้ำให้ยอมรับความรับผิดชอบต่อผลงานของตนเอง?",
+        "options": [
+            "Moderate interests of all stakeholders with public good",
+            "Accept responsibility for your own work",
+            "Approve software only if you have well-founded belief in its safety",
+            "Be fair and avoid deception in all statements"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในหมวด Client and Employer การใช้ซอฟต์แวร์ที่ได้มาโดยผิดกฎหมายหรือผิดจรรยาบรรณถือเป็นการละเมิดหลักการข้อใด?",
+        "options": [
+            "Provide service in area of competence",
+            "Not knowingly use illegally- or unethically-obtained software",
+            "Use property only as properly authorized",
+            "Accept no outside work detrimental to your primary employer"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics หมวด Product หลักการใดกำหนดให้ต้องระบุและจัดการประเด็นด้านจริยธรรม เศรษฐกิจ วัฒนธรรม กฎหมาย และสิ่งแวดล้อมที่เกี่ยวข้องกับโปรเจกต์?",
+        "options": [
+            "Strive for high quality, acceptable cost, and reasonable schedule",
+            "Identify, define, and address ethical, economic, cultural, legal, and environmental issues",
+            "Ensure adequate testing, debugging, and review of software",
+            "Treat software maintenance as professionally as new development"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในหมวด Judgement การตัดสินใจทางเทคนิคทั้งหมดควรถูกปรับให้สอดคล้องกับการสนับสนุนและรักษาคุณค่าของมนุษย์ ตามหลักการข้อใด?",
+        "options": [
+            "Only endorse documents you prepared or are under your control",
+            "Temper all technical judgments by need to support and maintain human values",
+            "Do not engage in deceptive financial practices",
+            "Disclose conflicts of interest to all concerned parties"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics หมวด Management การมอบหมายงานควรพิจารณาจากอะไร?",
+        "options": [
+            "ระดับการศึกษาและประสบการณ์",
+            "ความสัมพันธ์ส่วนตัวกับพนักงาน",
+            "ความพร้อมของทรัพยากรในองค์กร",
+            "ระยะเวลาที่เหลือของโปรเจกต์"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "ในหมวด Profession การสนับสนุนวิศวกรซอฟต์แวร์คนอื่นให้ปฏิบัติตาม Code of Ethics เป็นหน้าที่ตามหลักการข้อใด?",
+        "options": [
+            "Help develop favorable organizational environment",
+            "Support other SW engineers striving to follow this Code",
+            "Obey all laws governing work",
+            "Report violations of the Code to appropriate authorities"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics การอนุมัติซอฟต์แวร์โดยไม่มีเหตุผลอันสมควรเกี่ยวกับความปลอดภัย ถือเป็นการละเมิดหลักการในหมวดใด?",
+        "options": [
+            "Client and Employer",
+            "Product",
+            "Public Interest",
+            "Judgement"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ในหมวด Product การบำรุงรักษาซอฟต์แวร์ควรได้รับการปฏิบัติอย่างมืออาชีพเทียบเท่ากับการพัฒนาซอฟต์แวร์ใหม่ ตามหลักการข้อใด?",
+        "options": [
+            "Ensure adequate documentation",
+            "Treat software maintenance as professionally as new development",
+            "Strive to fully understand specifications for software",
+            "Ensure specifications are well-documented and approved"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics หมวด Management หลักการใดระบุว่าไม่ควรลงโทษวิศวกรซอฟต์แวร์ที่แสดงความกังวลด้านจริยธรรมเกี่ยวกับโปรเจกต์?",
+        "options": [
+            "Ensure good management practices",
+            "Assign work by education and experience levels",
+            "Don't punish for expressing ethical concerns about project",
+            "Offer fair and just remuneration"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ในหมวด Client and Employer การยอมรับงานภายนอกที่เป็นอันตรายต่อนายจ้างหลัก ถือเป็นการละเมิดหลักการข้อใด?",
+        "options": [
+            "Provide service in area of competence",
+            "Accept no outside work that is detrimental to your primary employer",
+            "Use property only as properly authorized",
+            "Report problematic projects to the client"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics การเปิดเผยความขัดแย้งทางผลประโยชน์ต่อทุกฝ่ายที่เกี่ยวข้อง เป็นหลักการในหมวดใด?",
+        "options": [
+            "Public Interest",
+            "Judgement",
+            "Management",
+            "Profession"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในหมวด Public Interest การพิจารณาประเด็นเกี่ยวกับความพิการทางกาย การจัดสรรทรัพยากร และความเสียเปรียบทางเศรษฐกิจ เป็นหลักการข้อใด?",
+        "options": [
+            "Be fair and avoid deception in all statements",
+            "Consider issues of physical disabilities, allocation of resources, economic disadvantage",
+            "Cooperate in efforts to address matters of grave public concern",
+            "Be encouraged to volunteer professional skills to good causes"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics การรายงานการละเมิด Code of Ethics ต่อหน่วยงานที่เหมาะสม เป็นหน้าที่ในหมวดใด?",
+        "options": [
+            "Client and Employer",
+            "Product",
+            "Profession",
+            "Judgement"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ในหมวด Product การใช้มาตรฐานวิชาชีพเมื่อเป็นไปได้ เป็นหลักการข้อใด?",
+        "options": [
+            "Strive for high quality, acceptable cost, and reasonable schedule",
+            "Follow professional standards whenever possible",
+            "Ensure adequate testing, debugging, and review of software",
+            "Ensure specifications are well-documented and approved"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics การมีส่วนร่วมในองค์กรวิชาชีพ การประชุม และสิ่งพิมพ์ เป็นหลักการในหมวดใด?",
+        "options": [
+            "Management",
+            "Profession",
+            "Public Interest",
+            "Client and Employer"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในหมวด Judgement หากวิศวกรต้องตัดสินใจระหว่างการพัฒนาซอฟต์แวร์ที่เพิ่มประสิทธิภาพแต่ลดความเป็นส่วนตัวของผู้ใช้ หลักการใดที่ควรใช้เป็นแนวทาง?",
+        "options": [
+            "Only endorse documents you prepared or are under your control",
+            "Temper all technical judgments by need to support and maintain human values",
+            "Do not engage in deceptive financial practices",
+            "Maintain professional objectivity in technical judgments"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics หมวด Public Interest หากซอฟต์แวร์ที่พัฒนาขึ้นอาจส่งผลกระทบต่อกลุ่มที่มีความเสียเปรียบทางเศรษฐกิจ หลักการใดที่วิศวกรควรให้ความสำคัญเป็นอันดับแรก?",
+        "options": [
+            "Accept responsibility for your own work",
+            "Consider issues of physical disabilities, allocation of resources, economic disadvantage",
+            "Be fair and avoid deception in all statements",
+            "Approve software only if you have well-founded belief in its safety"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในหมวด Product หากวิศวกรพบว่าการปฏิบัติตามมาตรฐานวิชาชีพขัดแย้งกับกำหนดการของโปรเจกต์ หลักการใดที่ควรใช้เพื่อตัดสินใจ?",
+        "options": [
+            "Strive for high quality, acceptable cost, and reasonable schedule",
+            "Follow professional standards whenever possible",
+            "Ensure adequate testing, debugging, and review of software",
+            "Identify, define, and address ethical, economic, cultural, legal, and environmental issues"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในหมวด Client and Employer หากวิศวกรได้รับมอบหมายงานที่อยู่นอกขอบเขตความสามารถ แต่การปฏิเสธอาจส่งผลต่อโอกาสในอาชีพ หลักการใดที่ควรยึดถือ?",
+        "options": [
+            "Use property only as properly authorized",
+            "Provide service in area of competence",
+            "Accept no outside work detrimental to your primary employer",
+            "Not knowingly use illegally- or unethically-obtained software"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics หมวด Management หากผู้จัดการมอบหมายงานให้วิศวกรที่มีประสบการณ์ไม่เพียงพอเพื่อประหยัดงบประมาณ หลักการใดที่ถูกละเมิด?",
+        "options": [
+            "Ensure good management practices",
+            "Assign work by education and experience levels",
+            "Don't punish for expressing ethical concerns about project",
+            "Offer fair and just remuneration"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในหมวด Profession หากวิศวกรพบว่าเพื่อนร่วมงานกำลังละเมิด Code of Ethics แต่การรายงานอาจส่งผลต่อความสัมพันธ์ในทีม หลักการใดที่ควรเป็นแนวทาง?",
+        "options": [
+            "Help develop favorable organizational environment",
+            "Support other SW engineers striving to follow this Code",
+            "Report violations of the Code to appropriate authorities",
+            "Obey all laws governing work"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ตาม ACM Code of Ethics หมวด Public Interest การตัดสินใจอนุมัติซอฟต์แวร์ที่มีความเสี่ยงต่อความปลอดภัยเพียงเล็กน้อยแต่ประโยชน์ต่อสาธารณะสูง ควรพิจารณาหลักการใดเป็นหลัก?",
+        "options": [
+            "Moderate interests of all stakeholders with public good",
+            "Approve software only if you have well-founded belief in its safety",
+            "Be encouraged to volunteer professional skills to good causes",
+            "Consider issues of physical disabilities, allocation of resources, economic disadvantage"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "ในหมวด Judgement หากวิศวกรต้องลงนามรับรองเอกสารที่ตนเองไม่ได้จัดทำและไม่สามารถควบคุมเนื้อหาได้ หลักการใดที่ห้ามการกระทำดังกล่าว?",
+        "options": [
+            "Temper all technical judgments by need to support and maintain human values",
+            "Only endorse documents you prepared or are under your control",
+            "Disclose conflicts of interest to all concerned parties",
+            "Maintain professional objectivity in technical judgments"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ตาม ACM Code of Ethics หมวด Product หากการบำรุงรักษาซอฟต์แวร์ถูกละเลยเนื่องจากขาดงบประมาณ แต่ส่งผลต่อความปลอดภัยของผู้ใช้ หลักการใดที่ถูกละเมิด?",
+        "options": [
+            "Ensure adequate documentation",
+            "Treat software maintenance as professionally as new development",
+            "Strive to fully understand specifications for software",
+            "Follow professional standards whenever possible"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในหมวด Management หากผู้จัดการปฏิเสธที่จะแก้ไขปัญหาที่วิศวกรรายงานเกี่ยวกับจริยธรรมของโปรเจกต์ หลักการใดที่ควรใช้เพื่อปกป้องวิศวกร?",
+        "options": [
+            "Assign work by education and experience levels",
+            "Ensure good management practices",
+            "Don't punish for expressing ethical concerns about project",
+            "Offer fair and just remuneration"
+        ],
+        "answer": 2
+    }
+            ];
+
+            let currentQuestionId = 0;
+            let answers = {};
+            let feedbackShown = {};
+            let score = 0;
+
+            const quizContainer = document.getElementById("quiz-container");
+            const questionButtonsContainer = document.getElementById("question-buttons");
+            const questionButtonsSection = document.getElementById("question-buttons-section");
+            const navigationButtons = document.getElementById("navigation-buttons");
+            const prevButton = document.getElementById("prev-button");
+            const nextButton = document.getElementById("next-button");
+            const submitButton = document.getElementById("submit-button");
+            const resultsSection = document.getElementById("results-section");
+            const scoreText = document.getElementById("score-text");
+            const resultsDetails = document.getElementById("results-details");
+            const restartButton = document.getElementById("restart-button");
+
+            function initQuiz() {
+                quizContainer.innerHTML = "";
+                questionButtonsContainer.innerHTML = "";
+                answers = {};
+                feedbackShown = {};
+                score = 0;
+
+                quizData.forEach((q, index) => {
+                    const questionDiv = document.createElement("div");
+                    questionDiv.id = `question-${index}`;
+                    questionDiv.className = "quiz-question" + (index !== 0 ? " hidden" : "");
+                    questionDiv.innerHTML = `
+                        <h3 class="text-lg font-medium mb-2 text-indigo-800">คำถามที่ ${index + 1} จาก ${quizData.length}</h3>
+                        <p class="text-base mb-4">${q.question}</p>
+                        <div class="space-y-3">
+                            ${q.options.map((option, i) => `
+                                <div class="radio-option">
+                                    <input type="radio" id="q${index}-${i}" name="q${index}" value="${i}">
+                                    <label for="q${index}-${i}">${option}</label>
+                                </div>
+                            `).join("")}
+                        </div>
+                        <div class="feedback hidden" id="feedback-${index}"></div>
+                    `;
+                    quizContainer.appendChild(questionDiv);
+
+                    const button = document.createElement("button");
+                    button.className = "question-button" + (index === 0 ? " active" : "");
+                    button.dataset.question = index;
+                    button.textContent = index + 1;
+                    button.addEventListener("click", () => showQuestion(Number(button.dataset.question)));
+                    questionButtonsContainer.appendChild(button);
+                });
+
+                prevButton.addEventListener("click", () => {
+                    if (currentQuestionId > 0) showQuestion(currentQuestionId - 1);
+                });
+
+                nextButton.addEventListener("click", () => {
+                    const selected = document.querySelector(`input[name="q${currentQuestionId}"]:checked`);
+                    if (selected) submitAnswer();
+                    if (currentQuestionId < quizData.length - 1) {
+                        showQuestion(currentQuestionId + 1);
+                    } else {
+                        updateSubmitButton();
+                    }
+                });
+
+                submitButton.addEventListener("click", showResults);
+
+                restartButton.addEventListener("click", () => {
+                    resultsSection.style.display = "none";
+                    quizContainer.style.display = "block";
+                    questionButtonsSection.style.display = "block";
+                    navigationButtons.style.display = "flex";
+                    initQuiz();
+                });
+
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener("change", () => {
+                        submitAnswer();
+                        updateSubmitButton();
+                    });
+                });
+
+                showQuestion(0);
+            }
+
+            function showQuestion(id) {
+                document.querySelectorAll(".quiz-question").forEach(q => q.classList.add("hidden"));
+                document.getElementById(`question-${id}`).classList.remove("hidden");
+
+                document.querySelectorAll(".question-button").forEach(btn => {
+                    btn.classList.remove("active");
+                    if (Number(btn.dataset.question) === id) btn.classList.add("active");
+                });
+
+                currentQuestionId = id;
+                prevButton.disabled = id === 0;
+                nextButton.disabled = id === quizData.length - 1 && feedbackShown[id];
+                submitButton.classList.toggle("hidden", id !== quizData.length - 1 || Object.keys(answers).length === 0);
+                nextButton.classList.toggle("hidden", id === quizData.length - 1 && feedbackShown[id]);
+                updateSubmitButton();
+            }
+
+            function submitAnswer() {
+                const selected = document.querySelector(`input[name="q${currentQuestionId}"]:checked`);
+                if (!selected) return;
+
+                const answer = Number(selected.value);
+                if (answers[currentQuestionId] !== undefined && answers[currentQuestionId] === quizData[currentQuestionId].answer) {
+                    score--;
+                }
+                answers[currentQuestionId] = answer;
+                feedbackShown[currentQuestionId] = true;
+
+                const question = quizData[currentQuestionId];
+                const isCorrect = answer === question.answer;
+
+                if (isCorrect) score++;
+
+                const feedbackDiv = document.getElementById(`feedback-${currentQuestionId}`);
+                feedbackDiv.classList.remove("hidden");
+                feedbackDiv.classList.add(isCorrect ? "correct" : "incorrect");
+                feedbackDiv.innerHTML = `
+                    <div class="flex items-center gap-2 font-medium">
+                        ${isCorrect ? `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>ถูกต้อง!</span>
+                        ` : `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 IFICATE cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                            <span>ไม่ถูกต้อง</span>
+                        `}
+                    </div>
+                    <p class="mt-1 text-sm">
+                        ${isCorrect ? "ยอดเยี่ยม! คุณเลือกคำตอบที่ถูกต้อง" : `คำตอบที่ถูกต้องคือ ${question.options[question.answer]}`}
+                    </p>
+                `;
+
+                document.querySelectorAll(`#question-${currentQuestionId} .radio-option`).forEach((option, i) => {
+                    const input = option.querySelector("input");
+                    input.disabled = true;
+                    if (i === question.answer) option.classList.add("correct");
+                    else if (i === answer && !isCorrect) option.classList.add("incorrect");
+                });
+
+                const button = document.querySelector(`.question-button[data-question="${currentQuestionId}"]`);
+                button.classList.remove("correct", "incorrect");
+                button.classList.add(isCorrect ? "correct" : "incorrect");
+
+                updateSubmitButton();
+            }
+
+            function updateSubmitButton() {
+                const allAnswered = Object.keys(answers).length === quizData.length;
+                submitButton.disabled = !allAnswered;
+                if (currentQuestionId === quizData.length - 1) {
+                    submitButton.classList.remove("hidden");
+                    nextButton.classList.toggle("hidden", feedbackShown[currentQuestionId]);
+                }
+            }
+
+            function showResults() {
+                quizContainer.style.display = "none";
+                questionButtonsSection.style.display = "none";
+                navigationButtons.style.display = "none";
+                resultsSection.style.display = "block";
+
+                scoreText.textContent = `คุณได้คะแนน ${score} จาก ${quizData.length} คะแนน (${(score / quizData.length * 100).toFixed(2)}%)`;
+
+                resultsDetails.innerHTML = quizData.map((q, i) => `
+                    <div class="mb-4">
+                        <p class="font-medium ${answers[i] === q.answer ? "text-green-600" : "text-red-600"}">
+                            คำถาม ${i + 1}: ${q.question}
+                        </p>
+                        <p>คำตอบของคุณ: ${answers[i] !== undefined ? q.options[answers[i]] : "ไม่ได้ตอบ"}</p>
+                        <p>คำตอบที่ถูกต้อง: ${q.options[q.answer]}</p>
+                    </div>
+                `).join("");
+            }
+
+            initQuiz();
+        });
+    </script>
+</body>
+</html>

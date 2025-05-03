@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structures</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5e17eb',
+                        secondary: '#1a1a1a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 1px solid #e0e7ff;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .radio-option:hover {
+            background-color: #eef2ff;
+        }
+        .radio-option.correct {
+            background-color: #d1fae5;
+            border-color: #10b981;
+        }
+        .radio-option.incorrect {
+            background-color: #fee2e2;
+            border-color: #ef4444;
+        }
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.375rem;
+        }
+        .feedback.correct {
+            background-color: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        .feedback.incorrect {
+            background-color: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #b91c1c;
+        }
+        .question-button {
+            height: 2.5rem;
+            width: 2.5rem;
+            padding: 0;
+            font-weight: 500;
+            border-radius: 0.375rem;
+            border: 1px solid #c7d2fe;
+            background-color: #ffffff;
+            cursor: pointer;
+        }
+        .question-button.active {
+            background: linear-gradient(to right, #5e17eb, #7c3aed);
+            color: #ffffff;
+            border-color: #5e17eb;
+        }
+        .question-button.correct {
+            background-color: #10b981;
+            color: #ffffff;
+            border-color: #10b981;
+        }
+        .question-button.incorrect {
+            background-color: #ef4444;
+            color: #ffffff;
+            border-color: #ef4444;
+        }
+        #results-section {
+            display: none;
+        }
+    </style>
+</head>
+<body class="font-sans bg-indigo-50/30">
+    <div class="flex flex-col min-h-screen">
+        <header class="sticky top-0 z-10 border-b bg-white shadow-sm">
+            <div class="container mx-auto flex h-16 items-center px-4 max-w-7xl">
+                <a href="ExamHub.html" class="flex items-center gap-2 font-bold text-xl text-indigo-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-6 w-6 text-indigo-600">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                    <span>ExamHub</span>
+                </a>
+            </div>
+        </header>
+        <main class="flex-1 container mx-auto py-8 px-4 max-w-4xl">
+            <div class="flex flex-col items-start gap-4 mb-8">
+                <div class="flex items-center gap-2">
+                    <a href="subject.html" class="text-indigo-700 hover:text-indigo-800 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                            <path d="m12 19-7-7 7-7"></path>
+                            <path d="M19 12H5"></path>
+                        </svg>
+                        กลับไปที่ วิชาทั้งหมด
+                    </a>
+                </div>
+                <h1 class="text-3xl font-bold tracking-tight text-gradient">Data Structures and Algorithms</h1>
+                <p class="text-gray-500">ตอบคำถามด้านล่าง คุณสามารถเลือกคำถามได้จากรายการคำถาม</p>
+            </div>
+            <div class="grid grid-cols-1 gap-6">
+                <div class="bg-white rounded-lg border border-indigo-100 shadow-sm overflow-hidden">
+                    <div class="p-6" id="quiz-container">
+                        <!-- Questions will be dynamically inserted here -->
+                    </div>
+                    <div class="flex justify-between p-4 border-t border-indigo-100" id="navigation-buttons">
+                        <button id="prev-button" class="px-4 py-2 border border-indigo-200 text-indigo-700 rounded-md hover:bg-indigo-50 hover:text-indigo-800 disabled:opacity-50" disabled>ก่อนหน้า</button>
+                        <button id="next-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90">ถัดไป</button>
+                        <button id="submit-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90 hidden" disabled>ส่งคำตอบ</button>
+                    </div>
+                </div>
+                <div id="question-buttons-section">
+                    <h2 class="text-lg font-semibold mb-4 text-indigo-800">คำถาม</h2>
+                    <div class="flex flex-wrap gap-2" id="question-buttons">
+                        <!-- Question buttons will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div id="results-section" class="bg-white rounded-lg border border-indigo-100 shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-bold text-indigo-800">ผลลัพธ์</h2>
+                        <button id="restart-button" class="px-4 py-2 bg-gradient-primary text-white rounded-md hover:opacity-90">เริ่มใหม่</button>
+                    </div>
+                    <p id="score-text" class="text-lg mb-4"></p>
+                    <div id="results-details"></div>
+                </div>
+            </div>
+        </main>
+        <footer class="border-t py-6 bg-white">
+            <div class="container mx-auto flex flex-col md:flex-row items-center justify-between gap-4 px-4 max-w-7xl">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="h-5 w-5 text-indigo-600">
+                        <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                        <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                    </svg>
+                    <span class="font-semibold text-indigo-800">ExamHub</span>
+                </div>
+                <p class="text-sm text-gray-500">© <span id="current-year"></span> ExamHub. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("current-year").textContent = new Date().getFullYear();
+
+            const quizData = [
+            {
+        "question": "ข้อใดอธิบายความลึก (Depth) ของโหนดในต้นไม้ได้อย่างถูกต้อง?",
+        "options": [
+            "จำนวนโหนดลูกของโหนดนั้น",
+            "จำนวนขอบจากโหนดไปยังใบที่ลึกที่สุด",
+            "จำนวนขอบจากโหนดไปยังราก",
+            "จำนวนโหนดทั้งหมดในต้นไม้ย่อยที่มีรากที่โหนดนั้น"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ในคลาส LinkedTree เมธอด _validate(p) มีจุดประสงค์หลักเพื่ออะไร?",
+        "options": [
+            "ตรวจสอบว่าโหนดมีโหนดลูกอย่างน้อยหนึ่งโหนด",
+            "ตรวจสอบว่า position p เป็นออบเจ็กต์ Position ที่ถูกต้องและอยู่ในต้นไม้",
+            "ตรวจสอบว่าโหนดเป็นรากของต้นไม้",
+            "ตรวจสอบว่า element ของโหนดตรงกับประเภทข้อมูลที่คาดหวัง"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "เมธอดใดใน Python Tree ADT มีความซับซ้อนด้านเวลา O(n) เมื่อใช้งานอย่างมีประสิทธิภาพ?",
+        "options": [
+            "num_children(p)",
+            "height(p) โดยใช้ _height2",
+            "is_leaf(p)",
+            "is_root(p)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "จะเกิดอะไรขึ้นหากเรียกเมธอด remove(p) บนโหนดที่มีโหนดลูกในคลาส LinkedTree?",
+        "options": [
+            "ลบเฉพาะโหนดนั้น และโหนดลูกจะถูกกำหนดใหม่ให้กับโหนดพ่อแม่",
+            "โหนดและโหนดลูกทั้งหมดถูกลบแบบเรียกซ้ำ",
+            "เมธอดจะเกิดข้อผิดพลาดเพราะไม่สามารถลบโหนดที่มีลูกได้",
+            "โหนดถูกทำเครื่องหมายว่าเลิกใช้งานแต่ไม่ถูกลบ"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ข้อใดไม่ใช่คุณสมบัติของต้นไม้ทั่วไป (General Tree) ตามที่ระบุในเอกสาร?",
+        "options": [
+            "แต่ละโหนด (ยกเว้นราก) มีโหนดพ่อแม่เพียงโหนดเดียว",
+            "โหนดสามารถมีจำนวนโหนดลูกเท่าใดก็ได้",
+            "โหนดลูกของแต่ละโหนดต้องเรียงลำดับเฉพาะ",
+            "ต้นไม้สามารถว่างเปล่า โดยไม่มีโหนดใด ๆ"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ในการใช้งาน find_element(e) ใน Python วิธีการสำรวจแบบใดถูกใช้เพื่อค้นหา element?",
+        "options": [
+            "Breadth-First Search (BFS)",
+            "Depth-First Search (DFS)",
+            "Inorder Traversal",
+            "Level-Order Traversal"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "การทดสอบใดใน LinkedTree ตรวจสอบว่าความสัมพันธ์ระหว่างโหนดพ่อแม่และโหนดลูกถูกต้อง?",
+        "options": [
+            "test_tree_structure()",
+            "test_add_child()",
+            "test_parent_references()",
+            "test_find_element()"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "เมธอด _make_position(node) ในคลาส LinkedTree มีจุดประสงค์เพื่ออะไร?",
+        "options": [
+            "สร้างโหนดใหม่ด้วย element ที่กำหนด",
+            "ตรวจสอบความสัมพันธ์ระหว่างโหนดพ่อแม่และโหนดลูก",
+            "ห่อหุ้มการอ้างอิงโหนดเข้าในออบเจ็กต์ Position",
+            "คำนวณความลึกของโหนด"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ข้อใดต่อไปนี้ไม่ใช่การใช้งานโครงสร้างต้นไม้ตามที่ระบุในเอกสาร?",
+        "options": [
+            "การจัดระเบียบระบบไฟล์",
+            "การจัดทำดัชนีฐานข้อมูล",
+            "การเรียงลำดับอาร์เรย์เชิงเส้น",
+            "การวิเคราะห์ XML/HTML"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ความสูง (Height) ของต้นไม้ที่มีโหนดเดียว (ราก) ตามนิยามแบบเรียกซ้ำคือเท่าใด?",
+        "options": [
+            "0",
+            "1",
+            "2",
+            "ไม่กำหนด"
+        ],
+        "answer": 0
+    },{
+        "question": "ในคลาส LinkedBinaryTree หากพยายามเพิ่มโหนดลูกที่สามให้กับโหนดที่มีลูกสองโหนดอยู่แล้ว จะเกิดอะไรขึ้น?",
+        "options": [
+            "โหนดลูกที่สามจะถูกเพิ่มเป็น left child ของ right child",
+            "เมธอด add_child() จะแทนที่ right child ด้วยโหนดใหม่",
+            "จะเกิด ValueError เพราะจำกัดจำนวนลูกไว้ที่สอง",
+            "โหนดลูกที่สามจะถูกเพิ่มโดยไม่มีการตรวจสอบ"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "เมธอดใดใน LinkedBinaryTree ใช้เพื่อเข้าถึง right child และคืนค่า None หากไม่มี right child?",
+        "options": [
+            "left(p)",
+            "right(p)",
+            "children(p)",
+            "add_right(p, e)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในการทำ Inorder Traversal บน BST ลำดับการเยี่ยมโหนดจะเป็นอย่างไร?",
+        "options": [
+            "Root -> Left -> Right",
+            "Left -> Root -> Right",
+            "Left -> Right -> Root",
+            "Right -> Root -> Left"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "เมื่อลบโหนดที่มีลูกสองโหนดใน BST จะใช้กลยุทธ์ใดเพื่อรักษาคุณสมบัติของ BST?",
+        "options": [
+            "แทนที่ด้วย left child",
+            "แทนที่ด้วย right child",
+            "แทนที่ด้วย Inorder Successor (โหนดที่มีค่าน้อยที่สุดใน right subtree)",
+            "ลบโหนดโดยไม่แทนที่"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ใน worst case ความซับซ้อนด้านเวลาของการค้นหาใน BST คือเท่าใด?",
+        "options": [
+            "O(log n)",
+            "O(n)",
+            "O(n log n)",
+            "O(1)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "เมธอด _find_min(self, p) ใน BST มีจุดประสงค์เพื่ออะไร?",
+        "options": [
+            "ค้นหาค่ามากที่สุดใน left subtree",
+            "ค้นหาค่าน้อยที่สุดใน right subtree (Inorder Successor)",
+            "คำนวณความสูงของ subtree",
+            "ตรวจสอบว่าโหนดเป็น leaf หรือไม่"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "หาก insert 元素ในลำดับ ascending order (เช่น 10, 20, 30, 40) เข้าไปใน BST โครงสร้างของต้นไม้จะเป็นอย่างไร?",
+        "options": [
+            "Balanced tree ที่มีความสูง O(log n)",
+            "ต้นไม้เหมือน Linked List โดยทุกโหนดมีเฉพาะ right child",
+            "ต้นไม้เหมือน Linked List โดยทุกโหนดมีเฉพาะ left child",
+            "Complete tree ที่ทุกใบมีความลึกเท่ากัน"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ข้อใดไม่ใช่การประยุกต์ใช้งานทั่วไปของ Binary Search Tree?",
+        "options": [
+            "Database indexing",
+            "Symbol tables ใน compilers",
+            "Linear array sorting",
+            "Decision trees ใน AI"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ในการทำ Breadth-First Traversal อัลกอริทึมจะใช้โครงสร้างข้อมูลใดเพื่อเก็บโหนดที่รอการเยี่ยม?",
+        "options": [
+            "Stack",
+            "Queue",
+            "Array",
+            "Heap"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "เมื่อลบโหนดที่มีลูกเพียงโหนดเดียวใน LinkedBinaryTree โหนดนั้นจะถูกแทนที่ด้วยอะไร?",
+        "options": [
+            "โหนดลูกของมัน",
+            "Inorder Successor",
+            "โหนด parent ของมัน",
+            "ไม่มีอะไร ระบบจะโยนข้อผิดพลาด"
+        ],
+        "answer": 0
+    }, {
+        "question": "ใน Python dictionary หากพยายามเข้าถึง key ที่ไม่มีอยู่ใน map โดยใช้ M['key'] จะเกิดอะไรขึ้น?",
+        "options": [
+            "คืนค่า None",
+            "คืนค่า default value ที่กำหนดไว้",
+            "โยน KeyError",
+            "เพิ่ม key ใหม่ด้วยค่า None"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "เมธอดใดใน UnsortedTableMap มี time complexity เป็น O(n) สำหรับการค้นหาค่า?",
+        "options": [
+            "__setitem__(k, v)",
+            "__getitem__(k)",
+            "__len__()",
+            "__iter__()"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Hash Table ที่ใช้ separate chaining แต่ละ index จะเก็บข้อมูลในรูปแบบใด?",
+        "options": [
+            "Single key-value pair",
+            "Linked list ของ key-value pairs",
+            "Sorted array ของ key-value pairs",
+            "Binary tree ของ key-value pairs"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน SortedTableMap การค้นหาค่าด้วย __getitem__(k) ใช้ algorithm ใดเพื่อให้ได้ time complexity O(log n)?",
+        "options": [
+            "Linear search",
+            "Binary search",
+            "Hash-based search",
+            "Depth-first search"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "เมธอด find_lt(k) ใน SortedTableMap จะคืนค่าอะไร?",
+        "options": [
+            "Key-value pair ที่มี key น้อยที่สุด",
+            "Key-value pair ที่มี key มากที่สุด",
+            "Key-value pair ที่มี key น้อยกว่า k อย่างเคร่งครัดและมากที่สุด",
+            "Key-value pair ที่มี key มากกว่า k อย่างเคร่งครัดและน้อยที่สุด"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ใน Hash Table หากใช้ linear probing และเกิด collision อัลกอริทึมจะทำอย่างไร?",
+        "options": [
+            "เก็บ key-value pair ใน linked list ที่ index เดิม",
+            "ค้นหา slot ถัดไปที่ว่างโดยเพิ่ม index ทีละ 1",
+            "ใช้ hash function อีกตัวเพื่อคำนวณ index ใหม่",
+            "เพิ่ม index ด้วยค่า quadratic (i^2)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ข้อใดไม่ใช่ application ทั่วไปของ Hash Table?",
+        "options": [
+            "Caching ใน web browsers",
+            "Database indexing",
+            "Symbol tables ใน compilers",
+            "Range queries ใน event logs"
+        ],
+        "answer": 3
+    },
+    {
+        "question": "ใน SortedTableMap การ insert key-value pair ใหม่มี time complexity เท่าใด?",
+        "options": [
+            "O(1)",
+            "O(log n)",
+            "O(n)",
+            "O(n log n)"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "เมธอด setdefault(k, v) ใน Python dictionary จะทำอะไรหาก key k มีอยู่ใน map แล้ว?",
+        "options": [
+            "โยน KeyError",
+            "คืนค่า value เดิมของ key และไม่เปลี่ยน map",
+            "แทนที่ value เดิมด้วย v",
+            "เพิ่ม key-value pair ใหม่โดยไม่สนใจ key เดิม"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Hash Table ที่ใช้ double hashing สูตรสำหรับ probe ที่ i คืออะไร?",
+        "options": [
+            "h(k, i) = (h1(k) + i) mod N",
+            "h(k, i) = (h1(k) + i^2) mod N",
+            "h(k, i) = (h1(k) + i * h2(k)) mod N",
+            "h(k, i) = (h1(k) + h2(k)) mod N"
+        ],
+        "answer": 2
+    },{
+        "question": "ในกราฟที่เป็น directed graph และ strongly connected เงื่อนไขใดต้องเป็นจริง?",
+        "options": [
+            "ทุกคู่ของ vertices มี undirected path เชื่อมถึงกัน",
+            "ทุกคู่ของ vertices มี directed path จาก u ไป v และจาก v ไป u",
+            "กราฟไม่มี cycles",
+            "กราฟมี spanning tree ที่ครอบคลุมทุก edges"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Adjacency Map การดำเนินการ get_edge(u, v) มี time complexity เท่าใดในกรณีเฉลี่ย?",
+        "options": [
+            "O(1)",
+            "O(min(deg(u), deg(v)))",
+            "O(m)",
+            "O(n)"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "ใน Edge List การค้นหา incident edges ของ vertex v มี time complexity เท่าใด?",
+        "options": [
+            "O(1)",
+            "O(n)",
+            "O(m)",
+            "O(deg(v))"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "เมธอด opposite(v) ใน Edge class จะคืนค่าอะไรถ้า v เป็น origin ของ edge?",
+        "options": [
+            "Vertex เดียวกัน (self-loop)",
+            "Vertex ที่เป็น destination",
+            "Edge object",
+            "None"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Python implementation ของ Graph class การคำนวณ edge_count() ใน undirected graph ทำไมต้องหาร total ด้วย 2?",
+        "options": [
+            "เพื่อนับเฉพาะ outgoing edges",
+            "เพราะแต่ละ edge ถูกนับสองครั้งใน adjacency map",
+            "เพื่อจัดการกับ parallel edges",
+            "เพื่อแปลงจาก directed เป็น undirected graph"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Depth-First Search (DFS) การค้นพบ vertex ใหม่จะเกิดขึ้นเมื่อใด?",
+        "options": [
+            "เมื่อ vertex ถูกเยี่ยมเยือนครั้งแรกผ่าน edge จาก vertex ที่เยี่ยมเยือนแล้ว",
+            "เมื่อ vertex อยู่ในระดับเดียวกับ source vertex",
+            "เมื่อ vertex มี degree สูงสุด",
+            "เมื่อ vertex เป็นส่วนหนึ่งของ cycle"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "Breadth-First Search (BFS) เหมาะสมที่สุดสำหรับปัญหาใดใน unweighted graph?",
+        "options": [
+            "ตรวจสอบว่าグラフเป็น acyclic",
+            "ค้นหา shortest path จาก source ไปยังทุก vertices",
+            "ค้นหา strongly connected components",
+            "คำนวณ spanning tree ที่มีน้ำหนักรวมต่ำสุด"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Adjacency Matrix การดำเนินการ degree(v) มี time complexity เท่าใด?",
+        "options": [
+            "O(1)",
+            "O(n)",
+            "O(m)",
+            "O(deg(v))"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ถ้า graph มี parallel edges และ self-loops กราฟนี้จะเป็น simple graph หรือไม่?",
+        "options": [
+            "เป็น simple graph ถ้าเป็น undirected",
+            "เป็น simple graph ถ้าไม่มี cycles",
+            "ไม่เป็น simple graph",
+            "เป็น simple graph ถ้ามี spanning tree"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ใน BFS หากต้องการค้นหา connected components ของ undirected graph ต้องทำอย่างไร?",
+        "options": [
+            "รัน BFS จาก vertex ทุกตัวที่ยังไม่ถูกเยี่ยมเยือน",
+            "รัน BFS จาก vertex เดียวและตรวจสอบ cycles",
+            "รัน BFS และนับจำนวน edges ใน spanning tree",
+            "รัน BFS และตรวจสอบ in-degree ของทุก vertex"
+        ],
+        "answer": 0
+    },{
+        "question": "ใน Floyd-Warshall Algorithm หากกราฟมี n vertices การวนลูปทั้งสามชั้น (i, j, k) มีจำนวนรอบรวมทั้งหมดเท่าใด?",
+        "options": [
+            "O(n²)",
+            "O(n³)",
+            "O(mn)",
+            "O(n log n)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Kahn's Algorithm สำหรับ Topological Sort หากกราฟมี cycle ผลลัพธ์จะเป็นอย่างไร?",
+        "options": [
+            "คืนลำดับที่สมบูรณ์แต่ไม่ถูกต้อง",
+            "คืนลำดับที่ไม่สมบูรณ์โดยขาดบาง vertices",
+            "เกิด infinite loop",
+            "คืน empty list"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Dijkstra’s Algorithm จะให้ผลลัพธ์ที่ไม่ถูกต้องหากกราฟมีอะไร?",
+        "options": [
+            "Self-loops",
+            "Parallel edges",
+            "Negative-weight edges",
+            "Disconnected components"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ใน Prim-Jarnik Algorithm การเลือก edge ที่มีน้ำหนักน้อยที่สุดในแต่ละรอบใช้โครงสร้างข้อมูลใดเพื่อให้มีประสิทธิภาพสูงสุด?",
+        "options": [
+            "Array",
+            "Hash Table",
+            "Priority Queue",
+            "Stack"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Kruskal’s Algorithm ใช้โครงสร้างข้อมูลใดในการตรวจสอบว่า vertices อยู่ใน cluster เดียวกัน?",
+        "options": [
+            "Adjacency List",
+            "Union-Find",
+            "Priority Queue",
+            "BFS Queue"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ในกรณีที่กราฟมี m edges และ n vertices Time complexity ของ Kruskal’s Algorithm เมื่อใช้ Union-Find ที่มี path compression และ rank heuristic คืออะไร?",
+        "options": [
+            "O(m log m)",
+            "O(n log n)",
+            "O(m α(n))",
+            "O(n²)"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Floyd-Warshall Algorithm เหมาะสมที่สุดสำหรับกราฟแบบใด?",
+        "options": [
+            "Sparse graphs ที่มี edges น้อย",
+            "Dense graphs ที่มี edges ใกล้เคียง n²",
+            "Unweighted graphs",
+            "DAGs ที่ไม่มี cycles"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Dijkstra’s Algorithm การทำ edge relaxation จะอัปเดต D[v] เมื่อใด?",
+        "options": [
+            "เมื่อ D[v] < D[u] + w(u,v)",
+            "เมื่อ D[v] > D[u] + w(u,v)",
+            "เมื่อ D[u] = ∞",
+            "เมื่อ v ไม่อยู่ใน priority queue"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "หากต้องการตรวจสอบว่า undirected graph เป็น DAG จะต้องตรวจสอบเงื่อนไขใด?",
+        "options": [
+            "กราฟต้องมี topological order",
+            "กราฟต้องไม่มี cycles และเป็น directed",
+            "กราฟต้องมี strongly connected components",
+            "กราฟต้องมี spanning tree"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Prim-Jarnik Algorithm หากกราฟมี disconnected components ผลลัพธ์จะเป็นอย่างไร?",
+        "options": [
+            "คืน MST ที่ครอบคลุมทุก components",
+            "คืน MST ของ component ที่มี start vertex",
+            "เกิด error เพราะกราฟต้อง connected",
+            "คืน empty tree"
+        ],
+        "answer": 2
+    }, {
+        "question": "ใน Insertion Sort หากอาร์เรย์มี n องค์ประกอบ การเปรียบเทียบสูงสุดที่เกิดขึ้นในกรณีที่แย่ที่สุด (worst case) คือเท่าใด?",
+        "options": [
+            "O(n)",
+            "O(n log n)",
+            "O(n²)",
+            "O(n³)"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "Merge Sort มี space complexity เป็น O(n) เนื่องจากสาเหตุใด?",
+        "options": [
+            "การใช้ recursion stack",
+            "การสร้างอาร์เรย์ชั่วคราวในขั้นตอน merging",
+            "การแบ่งอาร์เรย์ในขั้นตอน divide",
+            "การคัดลอก pivot ในแต่ละ recursive call"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Quick-Sort จะมี worst-case time complexity เป็น O(n²) เมื่อใด?",
+        "options": [
+            "เมื่อเลือก pivot เป็น random element",
+            "เมื่ออาร์เรย์มีขนาดเล็ก (n < 10)",
+            "เมื่ออาร์เรย์ถูกเรียงลำดับแล้วและเลือก pivot เป็น element สุดท้าย",
+            "เมื่อทุก element ในอาร์เรย์เท่ากันและเลือก pivot เป็น element แรก"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ใน Merge Sort หากอาร์เรย์มีขนาด n ความสูงของ merge sort tree จะเป็นเท่าใด?",
+        "options": [
+            "O(n)",
+            "O(log n)",
+            "O(n log n)",
+            "O(n²)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "Quick-Sort แตกต่างจาก Merge Sort ในแง่ใด?",
+        "options": [
+            "Quick-Sort เป็น stable sorting algorithm แต่ Merge Sort ไม่ใช่",
+            "Quick-Sort ทำการเรียงลำดับในขั้นตอน divide ส่วน Merge Sort ทำในขั้นตอน combine",
+            "Quick-Sort ใช้ space complexity O(n) ส่วน Merge Sort ใช้ O(log n)",
+            "Quick-Sort มี worst-case time complexity เป็น O(n log n)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Quick-Sort หากเลือก pivot แบบสุ่ม (randomized pivot) ค่า time complexity ที่คาดหวัง (expected time complexity) จะเป็นเท่าใด?",
+        "options": [
+            "O(n)",
+            "O(n log n)",
+            "O(n²)",
+            "O(n log² n)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ข้อใดต่อไปนี้เป็นข้อเสียของ Merge Sort เมื่อเปรียบเทียบกับ Quick-Sort?",
+        "options": [
+            "ไม่ใช่ in-place sorting algorithm",
+            "มี worst-case time complexity เป็น O(n²)",
+            "ไม่สามารถทำงานกับ linked lists ได้",
+            "ไม่ใช่ stable sorting algorithm"
+        ],
+        "answer": 0
+    },
+    {
+        "question": "ใน Insertion Sort หากอาร์เรย์ถูกเรียงลำดับแล้ว (best case) จำนวนการเปรียบเทียบจะเป็นเท่าใด?",
+        "options": [
+            "O(1)",
+            "O(n)",
+            "O(n log n)",
+            "O(n²)"
+        ],
+        "answer": 1
+    },
+    {
+        "question": "ใน Quick-Sort การเลือก pivot ที่ดีควรมีคุณสมบัติอย่างไร?",
+        "options": [
+            "เลือก element ที่ใหญ่ที่สุดในอาร์เรย์",
+            "เลือก element ที่เล็กที่สุดในอาร์เรย์",
+            "แบ่งอาร์เรย์ออกเป็นสองส่วนที่มีขนาดใกล้เคียงกัน",
+            "เลือก element ที่เท่ากับค่าเฉลี่ยของอาร์เรย์"
+        ],
+        "answer": 2
+    },
+    {
+        "question": "ใน merge function ของ Merge Sort หาก S1 และ S2 เป็นอาร์เรย์ที่เรียงลำดับแล้ว การเปรียบเทียบระหว่าง S1[i] และ S2[j] จะเกิดขึ้นเมื่อใด?",
+        "options": [
+            "เมื่อ i + j = len(S)",
+            "เมื่อ j = len(S2) หรือ S1[i] < S2[j]",
+            "เมื่อ i = len(S1) และ j = len(S2)",
+            "เมื่อ S1[i] > S2[j] เท่านั้น"
+        ],
+        "answer": 1
+    }
+            ];
+
+            let currentQuestionId = 0;
+            let answers = {};
+            let feedbackShown = {};
+            let score = 0;
+
+            const quizContainer = document.getElementById("quiz-container");
+            const questionButtonsContainer = document.getElementById("question-buttons");
+            const questionButtonsSection = document.getElementById("question-buttons-section");
+            const navigationButtons = document.getElementById("navigation-buttons");
+            const prevButton = document.getElementById("prev-button");
+            const nextButton = document.getElementById("next-button");
+            const submitButton = document.getElementById("submit-button");
+            const resultsSection = document.getElementById("results-section");
+            const scoreText = document.getElementById("score-text");
+            const resultsDetails = document.getElementById("results-details");
+            const restartButton = document.getElementById("restart-button");
+
+            function initQuiz() {
+                quizContainer.innerHTML = "";
+                questionButtonsContainer.innerHTML = "";
+                answers = {};
+                feedbackShown = {};
+                score = 0;
+
+                quizData.forEach((q, index) => {
+                    const questionDiv = document.createElement("div");
+                    questionDiv.id = `question-${index}`;
+                    questionDiv.className = "quiz-question" + (index !== 0 ? " hidden" : "");
+                    questionDiv.innerHTML = `
+                        <h3 class="text-lg font-medium mb-2 text-indigo-800">คำถามที่ ${index + 1} จาก ${quizData.length}</h3>
+                        <p class="text-base mb-4">${q.question}</p>
+                        <div class="space-y-3">
+                            ${q.options.map((option, i) => `
+                                <div class="radio-option">
+                                    <input type="radio" id="q${index}-${i}" name="q${index}" value="${i}">
+                                    <label for="q${index}-${i}">${option}</label>
+                                </div>
+                            `).join("")}
+                        </div>
+                        <div class="feedback hidden" id="feedback-${index}"></div>
+                    `;
+                    quizContainer.appendChild(questionDiv);
+
+                    const button = document.createElement("button");
+                    button.className = "question-button" + (index === 0 ? " active" : "");
+                    button.dataset.question = index;
+                    button.textContent = index + 1;
+                    button.addEventListener("click", () => showQuestion(Number(button.dataset.question)));
+                    questionButtonsContainer.appendChild(button);
+                });
+
+                prevButton.addEventListener("click", () => {
+                    if (currentQuestionId > 0) showQuestion(currentQuestionId - 1);
+                });
+
+                nextButton.addEventListener("click", () => {
+                    const selected = document.querySelector(`input[name="q${currentQuestionId}"]:checked`);
+                    if (selected) submitAnswer();
+                    if (currentQuestionId < quizData.length - 1) {
+                        showQuestion(currentQuestionId + 1);
+                    } else {
+                        updateSubmitButton();
+                    }
+                });
+
+                submitButton.addEventListener("click", showResults);
+
+                restartButton.addEventListener("click", () => {
+                    resultsSection.style.display = "none";
+                    quizContainer.style.display = "block";
+                    questionButtonsSection.style.display = "block";
+                    navigationButtons.style.display = "flex";
+                    initQuiz();
+                });
+
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener("change", () => {
+                        submitAnswer();
+                        updateSubmitButton();
+                    });
+                });
+
+                showQuestion(0);
+            }
+
+            function showQuestion(id) {
+                document.querySelectorAll(".quiz-question").forEach(q => q.classList.add("hidden"));
+                document.getElementById(`question-${id}`).classList.remove("hidden");
+
+                document.querySelectorAll(".question-button").forEach(btn => {
+                    btn.classList.remove("active");
+                    if (Number(btn.dataset.question) === id) btn.classList.add("active");
+                });
+
+                currentQuestionId = id;
+                prevButton.disabled = id === 0;
+                nextButton.disabled = id === quizData.length - 1 && feedbackShown[id];
+                submitButton.classList.toggle("hidden", id !== quizData.length - 1 || Object.keys(answers).length === 0);
+                nextButton.classList.toggle("hidden", id === quizData.length - 1 && feedbackShown[id]);
+                updateSubmitButton();
+            }
+
+            function submitAnswer() {
+                const selected = document.querySelector(`input[name="q${currentQuestionId}"]:checked`);
+                if (!selected) return;
+
+                const answer = Number(selected.value);
+                if (answers[currentQuestionId] !== undefined && answers[currentQuestionId] === quizData[currentQuestionId].answer) {
+                    score--;
+                }
+                answers[currentQuestionId] = answer;
+                feedbackShown[currentQuestionId] = true;
+
+                const question = quizData[currentQuestionId];
+                const isCorrect = answer === question.answer;
+
+                if (isCorrect) score++;
+
+                const feedbackDiv = document.getElementById(`feedback-${currentQuestionId}`);
+                feedbackDiv.classList.remove("hidden");
+                feedbackDiv.classList.add(isCorrect ? "correct" : "incorrect");
+                feedbackDiv.innerHTML = `
+                    <div class="flex items-center gap-2 font-medium">
+                        ${isCorrect ? `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>ถูกต้อง!</span>
+                        ` : `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 IFICATE cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                            <span>ไม่ถูกต้อง</span>
+                        `}
+                    </div>
+                    <p class="mt-1 text-sm">
+                        ${isCorrect ? "ยอดเยี่ยม! คุณเลือกคำตอบที่ถูกต้อง" : `คำตอบที่ถูกต้องคือ ${question.options[question.answer]}`}
+                    </p>
+                `;
+
+                document.querySelectorAll(`#question-${currentQuestionId} .radio-option`).forEach((option, i) => {
+                    const input = option.querySelector("input");
+                    input.disabled = true;
+                    if (i === question.answer) option.classList.add("correct");
+                    else if (i === answer && !isCorrect) option.classList.add("incorrect");
+                });
+
+                const button = document.querySelector(`.question-button[data-question="${currentQuestionId}"]`);
+                button.classList.remove("correct", "incorrect");
+                button.classList.add(isCorrect ? "correct" : "incorrect");
+
+                updateSubmitButton();
+            }
+
+            function updateSubmitButton() {
+                const allAnswered = Object.keys(answers).length === quizData.length;
+                submitButton.disabled = !allAnswered;
+                if (currentQuestionId === quizData.length - 1) {
+                    submitButton.classList.remove("hidden");
+                    nextButton.classList.toggle("hidden", feedbackShown[currentQuestionId]);
+                }
+            }
+
+            function showResults() {
+                quizContainer.style.display = "none";
+                questionButtonsSection.style.display = "none";
+                navigationButtons.style.display = "none";
+                resultsSection.style.display = "block";
+
+                scoreText.textContent = `คุณได้คะแนน ${score} จาก ${quizData.length} คะแนน (${(score / quizData.length * 100).toFixed(2)}%)`;
+
+                resultsDetails.innerHTML = quizData.map((q, i) => `
+                    <div class="mb-4">
+                        <p class="font-medium ${answers[i] === q.answer ? "text-green-600" : "text-red-600"}">
+                            คำถาม ${i + 1}: ${q.question}
+                        </p>
+                        <p>คำตอบของคุณ: ${answers[i] !== undefined ? q.options[answers[i]] : "ไม่ได้ตอบ"}</p>
+                        <p>คำตอบที่ถูกต้อง: ${q.options[q.answer]}</p>
+                    </div>
+                `).join("");
+            }
+
+            initQuiz();
+        });
+    </script>
+</body>
+</html>
